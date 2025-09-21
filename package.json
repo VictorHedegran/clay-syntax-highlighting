@@ -3,6 +3,10 @@
   "displayName": "clay-syntax-highlighting",
   "description": "",
   "publisher": "victorhedegran",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VictorHedegran/clay-syntax-highlighting"
+  },
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.104.0"
