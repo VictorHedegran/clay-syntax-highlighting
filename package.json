@@ -11,6 +11,7 @@
   "engines": {
     "vscode": "^1.104.0"
   },
+  "licence": "MIT",
   "categories": [
     "Programming Languages"
   ],
