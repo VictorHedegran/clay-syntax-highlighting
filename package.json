@@ -1,0 +1,74 @@
+{
+  "name": "clay-syntax-highlighting",
+  "displayName": "clay-syntax-highlighting",
+  "description": "",
+  "publisher": "victorhedegran",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.104.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescriptreact"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "javascript-with-clay",
+        "aliases": [
+          "JavaScript with Clay",
+          "js-clay"
+        ],
+        "extensions": [],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "typescript-with-clay",
+        "aliases": [
+          "TypeScript with Clay",
+          "ts-clay"
+        ],
+        "extensions": [],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "javascript-with-clay",
+        "scopeName": "source.clay-hbs-root.js",
+        "path": "./syntaxes/clay-hbs-root.json",
+        "embeddedLanguages": {
+          "source.js": "javascript"
+        }
+      },
+      {
+        "language": "typescript-with-clay",
+        "scopeName": "source.clay-hbs-root.ts",
+        "path": "./syntaxes/clay-hbs-typescript.json",
+        "embeddedLanguages": {
+          "source.ts": "typescript"
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.104.0",
+    "@types/node": "22.x",
+    "@typescript-eslint/eslint-plugin": "^8.42.0",
+    "@typescript-eslint/parser": "^8.42.0",
+    "eslint": "^9.34.0",
+    "typescript": "^5.9.2"
+  }
+}

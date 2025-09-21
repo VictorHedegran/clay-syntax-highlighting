@@ -1,0 +1,119 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "TypeScript with Clay Handlebars Template",
+  "scopeName": "source.clay-hbs-root.ts",
+  "patterns": [
+    {
+      "comment": "Handlebars block helpers",
+      "begin": "\\{\\{#(\\w+)",
+      "end": "\\{\\{/(\\1)\\}\\}",
+      "name": "meta.block.handlebars",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.block.begin.handlebars" },
+        "1": { "name": "support.function.block.handlebars" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.block.end.handlebars" },
+        "1": { "name": "support.function.block.handlebars" }
+      },
+      "patterns": [{ "include": "#handlebars-content" }, { "include": "$self" }]
+    },
+    {
+      "comment": "Handlebars expressions with Clay helpers",
+      "begin": "\\{\\{",
+      "end": "\\}\\}",
+      "name": "meta.embedded.expression.handlebars",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.expression.begin.handlebars" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.expression.end.handlebars" }
+      },
+      "patterns": [{ "include": "#handlebars-content" }]
+    },
+    {
+      "comment": "TypeScript content outside handlebars",
+      "include": "source.ts"
+    }
+  ],
+  "repository": {
+    "handlebars-content": {
+      "patterns": [
+        {
+          "comment": "Clay string transformation helpers",
+          "name": "support.function.clay.string.handlebars",
+          "match": "\\b(pascalCase|camelCase|kebabCase|snakeCase|startCase|pluralize|singularize)\\b"
+        },
+        {
+          "comment": "Clay control flow helpers",
+          "name": "support.function.clay.control.handlebars",
+          "match": "\\b(ifCond|switch|case|default)\\b"
+        },
+        {
+          "comment": "Clay comparison helpers",
+          "name": "support.function.clay.comparison.handlebars",
+          "match": "\\b(eq|ne|lt|gt|lte|gte|and|or)\\b"
+        },
+        {
+          "comment": "Clay loop helpers",
+          "name": "support.function.clay.loop.handlebars",
+          "match": "\\b(times|eachUnique|eachUniqueJSONPath)\\b"
+        },
+        {
+          "comment": "Clay utility helpers",
+          "name": "support.function.clay.utility.handlebars",
+          "match": "\\b(inc|json|markdown|propertyExists|splitAndUseWord)\\b"
+        },
+        {
+          "comment": "Standard Handlebars helpers",
+          "name": "support.function.handlebars",
+          "match": "\\b(if|unless|each|with|lookup|log)\\b"
+        },
+        {
+          "comment": "Handlebars special variables",
+          "name": "variable.language.handlebars",
+          "match": "@(index|first|last|key|root|this)"
+        },
+        {
+          "comment": "Handlebars operators",
+          "name": "keyword.operator.handlebars",
+          "match": "(==|===|!=|!==|<=|>=|<|>|&&|\\|\\|)"
+        },
+        {
+          "comment": "Handlebars paths and variables",
+          "name": "variable.other.handlebars",
+          "match": "[a-zA-Z_][a-zA-Z0-9_\\.]*"
+        },
+        {
+          "comment": "Handlebars strings",
+          "name": "string.quoted.single.handlebars",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.handlebars",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "comment": "Handlebars double quoted strings",
+          "name": "string.quoted.double.handlebars",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.handlebars",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "comment": "Handlebars numbers",
+          "name": "constant.numeric.handlebars",
+          "match": "\\b\\d+(\\.\\d+)?\\b"
+        }
+      ]
+    }
+  }
+}
