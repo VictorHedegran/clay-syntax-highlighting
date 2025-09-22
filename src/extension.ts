@@ -10,86 +10,111 @@ const TS_CLAY_LANG_ID = "typescript-with-clay";
 const MAGIC_COMMENT = "// @clay";
 
 /**
- * Checks if a document should be switched to a Clay language ID.
+ * Checks if a document should be switched to a Clay language ID or reverted back.
  * @param document The text document to check.
  */
-function checkAndSetLanguageId(document: vscode.TextDocument): void {
-  // Only process JavaScript and TypeScript files
-  const validLanguages = [
+async function checkAndSetLanguageId(
+  document: vscode.TextDocument
+): Promise<void> {
+  // Only process files with valid scheme
+  if (document.uri.scheme !== "file" || document.lineCount === 0) {
+    return;
+  }
+
+  // Process JavaScript/TypeScript files and their Clay variants
+  const baseLanguages = [
     "javascript",
     "javascriptreact",
     "typescript",
     "typescriptreact",
   ];
-  if (!validLanguages.includes(document.languageId)) {
+  const clayLanguages = [JS_CLAY_LANG_ID, TS_CLAY_LANG_ID];
+
+  if (![...baseLanguages, ...clayLanguages].includes(document.languageId)) {
     return;
   }
 
-  if (document.lineCount > 0) {
-    const firstLine = document.lineAt(0).text.trim();
+  const firstLine = document.lineAt(0).text.trim();
+  const hasMagicComment = firstLine === MAGIC_COMMENT;
 
-    // Check if the magic comment is present
-    if (firstLine === MAGIC_COMMENT) {
-      let targetLangId: string | null = null;
+  if (hasMagicComment) {
+    // Case 1: Magic comment exists, switch to Clay language if not already
+    let targetLangId: string | null = null;
 
-      // Determine the original language to select the correct derived ID
-      if (
-        document.languageId === "javascript" ||
-        document.languageId === "javascriptreact"
-      ) {
-        targetLangId = JS_CLAY_LANG_ID;
-      } else if (
-        document.languageId === "typescript" ||
-        document.languageId === "typescriptreact"
-      ) {
-        targetLangId = TS_CLAY_LANG_ID;
-      }
+    // Map base languages to target Clay language
+    if (
+      document.languageId === "javascript" ||
+      document.languageId === "javascriptreact"
+    ) {
+      targetLangId = JS_CLAY_LANG_ID;
+    } else if (
+      document.languageId === "typescript" ||
+      document.languageId === "typescriptreact"
+    ) {
+      targetLangId = TS_CLAY_LANG_ID;
+    }
+    // If already a Clay language, don't change anything
 
-      if (targetLangId && document.languageId !== targetLangId) {
-        // *** This is the key call: dynamically changes the language mode ***
-        vscode.languages.setTextDocumentLanguage(document, targetLangId);
-        console.log(
-          `Switched ${document.fileName} from ${document.languageId} to ${targetLangId}`
-        );
+    if (targetLangId && document.languageId !== targetLangId) {
+      await vscode.languages.setTextDocumentLanguage(document, targetLangId);
+      vscode.window.showInformationMessage(
+        `Clay Handlebars syntax enabled for ${document.fileName
+          .split("/")
+          .pop()}`
+      );
+    }
+  } else {
+    // Case 2: Magic comment doesn't exist, revert Clay language back to base language
+    let revertLangId: string | null = null;
 
-        // Show notification to user for feedback
-        vscode.window.showInformationMessage(
-          `Clay Handlebars syntax enabled for ${document.fileName
-            .split("/")
-            .pop()}`
-        );
-      }
+    if (document.languageId === JS_CLAY_LANG_ID) {
+      revertLangId = "javascript";
+    } else if (document.languageId === TS_CLAY_LANG_ID) {
+      revertLangId = "typescript";
+    }
+
+    if (revertLangId) {
+      await vscode.languages.setTextDocumentLanguage(document, revertLangId);
+      vscode.window.showInformationMessage(
+        `Clay Handlebars syntax disabled for ${document.fileName
+          .split("/")
+          .pop()}`
+      );
     }
   }
 }
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log("Clay Handlebars Extension is now active!");
-
-  // Only check documents when they are opened or changed, not all existing ones
-  // This prevents automatic switching when extension first loads
+  // Check all currently open documents when extension activates
+  vscode.workspace.textDocuments.forEach(checkAndSetLanguageId);
 
   // Listen for when new documents are opened
   context.subscriptions.push(
     vscode.workspace.onDidOpenTextDocument(checkAndSetLanguageId)
   );
 
-  // Listen for when documents are saved (to catch when magic comment is added)
-  context.subscriptions.push(
-    vscode.workspace.onDidSaveTextDocument(checkAndSetLanguageId)
-  );
-
-  // Listen for when document content changes (to catch when magic comment is added)
+  // Listen for when document content changes (to catch when magic comment is added/removed)
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument((event) => {
-      // Only check if the first line changed
+      // Check if any changes affect the first line
       const changes = event.contentChanges;
-      const hasFirstLineChange = changes.some(
-        (change) => change.range.start.line === 0 || change.range.end.line === 0
-      );
+      const hasFirstLineChange = changes.some((change) => {
+        // Check if the change affects line 0 (first line)
+        const startLine = change.range.start.line;
+        const endLine = change.range.end.line;
+
+        // Change affects first line if it starts at line 0, ends at line 0,
+        // or spans across line 0
+        return (
+          startLine === 0 || endLine === 0 || (startLine < 1 && endLine >= 0)
+        );
+      });
 
       if (hasFirstLineChange) {
-        checkAndSetLanguageId(event.document);
+        // Use a small timeout to ensure the document has been updated
+        setTimeout(() => {
+          checkAndSetLanguageId(event.document);
+        }, 50);
       }
     })
   );

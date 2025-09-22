@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/VictorHedegran/clay-syntax-highlighting"
   },
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.104.0"
   },
@@ -16,10 +16,7 @@
     "Programming Languages"
   ],
   "activationEvents": [
-    "onLanguage:javascript",
-    "onLanguage:typescript",
-    "onLanguage:javascriptreact",
-    "onLanguage:typescriptreact"
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {
